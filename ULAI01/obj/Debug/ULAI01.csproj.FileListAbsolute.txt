@@ -1,0 +1,8 @@
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\bin\Debug\ULAI01.exe
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\bin\Debug\ULAI01.pdb
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.frmDataDisplay.resources
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.csproj.GenerateResource.cache
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.csproj.CoreCompileInputs.cache
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.exe
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.pdb
+C:\Users\Public\Documents\Measurement Computing\DAQ\C#\ULAI01\obj\Debug\ULAI01.csproj.AssemblyReference.cache
