@@ -35,7 +35,8 @@ namespace ULAI01
 {
 	public class frmDataDisplay : System.Windows.Forms.Form
 	{
-        
+        BackgroundWorker backworker;
+        Stopwatch sw = new Stopwatch(); //Normal Stopwatch
         // Create a new MccBoard object for Board 0
         MccDaq.MccBoard DaqBoard = new MccDaq.MccBoard(0);
 
@@ -72,6 +73,8 @@ namespace ULAI01
         private Label label11;
         public Button btnExportData;
         AnalogIO.clsAnalogIO AIOProps = new AnalogIO.clsAnalogIO();
+        public Button btnTest;
+
         //AnalogIO.clsAnalogIO AIOProps = new AnalogIO.clsAnalogIO();
         private List<string> DataDaqList = new List<string>();
 
@@ -127,6 +130,15 @@ namespace ULAI01
                     " and Range of " + Range.ToString() + ".";
                 HighChan = LowChan + NumAOChans - 1;
             }
+
+            backworker = new BackgroundWorker();
+            backworker.DoWork += new DoWorkEventHandler(backworker_DoWork);
+            backworker.ProgressChanged += new ProgressChangedEventHandler
+                    (backworker_ProgressChanged);
+            backworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler
+                    (backworker_RunWorkerCompleted);
+            backworker.WorkerReportsProgress = true;
+            backworker.WorkerSupportsCancellation = true;
         }
 
         private void cmdStartConvert_Click(object eventSender, System.EventArgs eventArgs)
@@ -138,14 +150,38 @@ namespace ULAI01
             if (tmrConvert.Enabled)
             {
                 cmdStartConvert.Text = "Start";
-                tmrConvert.Enabled = false;
+                //tmrConvert.Enabled = false;
+                ///////////////////////////////////////////////////////////////
+                if (backworker.IsBusy)
+                {
+                    //rtbDisplay.AppendText("Cancel Requested, please wait" + rs);
+                    //rtbDisplay.ScrollToCaret();
+                    //pgbProgram.Value = 0;
+                    // Notify the worker thread that a cancel has been requested.
+                    // The cancel will not actually happen until the thread in the
+                    // DoWork checks the backworker.CancellationPending flag.
+                    backworker.CancelAsync();
+                }
+                ///////////////////////////////////////////////////////////////
                 chkRecordData.Enabled = true;
 
             }
             else
             {
                 cmdStartConvert.Text = "Stop";
-                tmrConvert.Enabled = true;
+                //tmrConvert.Enabled = true;
+                ///////////////////////////////////////////////////////////////
+                //List<object> arguments = new List<object>();
+                //arguments.Add(UserCodeFormated); // 0
+                //arguments.Add(MCU);
+                //arguments.Add(Source);
+                //arguments.Add(Destination);
+                //arguments.Add(flags);
+
+                //backworker.RunWorkerAsync(arguments);
+                backworker.RunWorkerAsync();
+
+                ///////////////////////////////////////////////////////////////
                 chkRecordData.Enabled = false; 
                 ///////////////////////////////////////////////
                 /// Output set
@@ -271,7 +307,7 @@ namespace ULAI01
                 if (chkRecordData.Checked == true)
                 {
                     //DataDaqList.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fff tt") + "," + DataValue0.ToString() + "," + DataValue1.ToString());
-                    DataDaqList.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fff tt") + "," + DataValue0.ToString());
+                    DataDaqList.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt") + "," + DataValue0.ToString());
                 }
                 //DataDaqList.Add(DateTime.Now.ToString() + "," + DataValue0.ToString() + "," + DataValue1.ToString());
                 //watch.Stop();
@@ -323,13 +359,115 @@ namespace ULAI01
 
         }
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void backworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            try
+            {
+                List<object> genericlist = e.Result as List<object>;
+                string result = (string)genericlist[0];
+
+                //pgbProgram.Value = 0;
+
+                //if (e.Cancelled)
+                //{
+                //    rtbDisplay.AppendText(result + rs);
+                //    rtbDisplay.ScrollToCaret();
+                //}
+
+                //else if (e.Error != null)
+                //{
+                //    rtbDisplay.AppendText(result + rs);
+                //    rtbDisplay.ScrollToCaret();
+                //}
+                //else
+                //{
+                //    rtbDisplay.AppendText(result + rs);
+                //    rtbDisplay.ScrollToCaret();
+                //}
+            }
+            catch (Exception ex)
+            {
+                //Debug.WriteLine("Exception caught for device " + ex.Message);
+            }
+
+
+            //Change the status of the buttons on the UI accordingly
+            ////btnStartAsyncOperation.Enabled = true;
+            ////btnCancel.Enabled = false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void backworker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //pgbProgram.Value = e.ProgressPercentage;
+            //rtbDisplay.AppendText(e.UserState + rs);
+            //rtbDisplay.ScrollToCaret();
+
+        }
+
+        ////
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void backworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            while (true)
+            {
+
+                
+
+
+                if (worker.CancellationPending)
+                {
+                    e.Result = BackgroundWorkerReportComplete("Cancel");
+
+                    return;
+                }
+            }
+        }
+
+        private object BackgroundWorkerReportComplete(string game_over)
+        {
+            List<object> arguments_Back_out = new List<object>();
+
+
+
+            arguments_Back_out.Add(game_over);
+
+            return arguments_Back_out;
+        }
+
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
         #region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-	    
-		private void InitializeComponent()
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+
+        private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
             this.ToolTip1 = new System.Windows.Forms.ToolTip(this.components);
@@ -371,6 +509,7 @@ namespace ULAI01
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.btnExportData = new System.Windows.Forms.Button();
+            this.btnTest = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -382,7 +521,7 @@ namespace ULAI01
             this.cmdStartConvert.Cursor = System.Windows.Forms.Cursors.Default;
             this.cmdStartConvert.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmdStartConvert.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cmdStartConvert.Location = new System.Drawing.Point(109, 469);
+            this.cmdStartConvert.Location = new System.Drawing.Point(124, 469);
             this.cmdStartConvert.Name = "cmdStartConvert";
             this.cmdStartConvert.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cmdStartConvert.Size = new System.Drawing.Size(52, 26);
@@ -851,12 +990,28 @@ namespace ULAI01
             this.btnExportData.UseVisualStyleBackColor = false;
             this.btnExportData.Click += new System.EventHandler(this.btnExportData_Click);
             // 
+            // btnTest
+            // 
+            this.btnTest.BackColor = System.Drawing.SystemColors.Control;
+            this.btnTest.Cursor = System.Windows.Forms.Cursors.Default;
+            this.btnTest.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnTest.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.btnTest.Location = new System.Drawing.Point(28, 469);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btnTest.Size = new System.Drawing.Size(52, 26);
+            this.btnTest.TabIndex = 23;
+            this.btnTest.Text = "Test";
+            this.btnTest.UseVisualStyleBackColor = false;
+            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+            // 
             // frmDataDisplay
             // 
             this.AcceptButton = this.cmdStartConvert;
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 13);
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(390, 537);
+            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.btnExportData);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -971,6 +1126,40 @@ namespace ULAI01
         private void groupBox2_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+            // Display the timer frequency and resolution.
+            if (Stopwatch.IsHighResolution)
+            {
+                //AddMessage("Using the system's high-resolution performance counter.");
+                MessageBox.Show("High Resolution", "Timer",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            }
+            else
+            {
+                //AddMessage("Using the DateTime class.");
+                MessageBox.Show("Low Resolution", "Timer",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            }
+
+            long frequency = Stopwatch.Frequency;
+            //AddMessage(string.Format("Timer frequency in ticks per second = {0}", frequency));
+            MessageBox.Show(string.Format("Timer frequency in ticks per second = {0}", frequency), "Timer",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            long nanosecPerTick = (1000L * 1000L * 1000L) / frequency;
+            //AddMessage(string.Format("Timer is accurate to within {0} nanoseconds", nanosecPerTick));
+            MessageBox.Show(string.Format(string.Format("Timer is accurate to within {0} nanoseconds", nanosecPerTick)), "Timer",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            DataDaqList.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt"));
+
+            sw.Start();
+            while(sw.ElapsedTicks < 10){};
+
+            sw.Stop();
+            DataDaqList.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt"));
         }
 
         private void txtNumChan_TextChanged(object sender, EventArgs e)
