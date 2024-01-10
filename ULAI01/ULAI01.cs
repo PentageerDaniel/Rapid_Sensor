@@ -99,8 +99,44 @@ namespace ULAI01
         private int Display_Average = 10;
         private TextBox txt_Display_Average;
         private Label label18;
-        private float Voltage_ref = 0; 
+        private float Voltage_ref = 0;
+        private RichTextBox rtbDisplay;
+        private Label label19;
+        private Label label24;
+        private Label label23;
+        private Label label22;
+        private TextBox txtIntervalDAQ;
+        private Label label21;
+        private TextBox txtTimeTreshDAQ;
+        private Label label20;
+        private TextBox txtVoltageTreshDAQ;
+        private CheckBox chkThresRecord;
 
+        private int VoltageTreshDAQ = 0;
+        private int TimeTreshDAQ = 0;
+        private int IntervalDAQ = 0;
+        private bool ThresholeRecording = false;
+        public Label label25;
+        private Label label26;
+        private TextBox txtVoltsToSet2;
+        private Label lblShowVoltage2;
+        public Label label27;
+        public Label lblShowVoltsCh3;
+        private GroupBox groupBox1;
+        private TabPage tabPage3;
+        private CheckBox chkChEnable2;
+        private CheckBox chkChEnable3;
+        private CheckBox chkChEnable1;
+        private CheckBox chkChEnable0;
+        private Label label29;
+        private Label label28;
+        private TextBox txtRecentIntervalRecord;
+        private CheckBox chkRecentRecord;
+
+        private bool RecentSampleRecording = false;
+        private int RecentSampleInterval = 0;
+
+        private int Channel_Sel = 0x00;
 
         //AnalogIO.clsAnalogIO AIOProps = new AnalogIO.clsAnalogIO();
         private List<string> DataDaqList = new List<string>();
@@ -168,6 +204,17 @@ namespace ULAI01
                     (backworker_RunWorkerCompleted);
             backworker.WorkerReportsProgress = true;
             backworker.WorkerSupportsCancellation = true;
+
+
+            // default setting
+            chkRecordData.Checked = true;
+            chkChEnable0.Checked = true;
+            chkChEnable1.Checked = true;
+            chkChEnable2.Checked = true;
+            chkChEnable3.Checked = true;
+            txt_DAQ_Setup_Sampling_Rate.Text = "6250";
+            chkRecentRecord.Checked = true;
+            txtRecentIntervalRecord.Text = "30";
         }
 
         private void cmdStartConvert_Click(object eventSender, System.EventArgs eventArgs)
@@ -179,31 +226,37 @@ namespace ULAI01
             SaveFileDialog sfd;
             sfd = new SaveFileDialog();
 
-            sfd.FileName = "DAQ_USB_231" + DateTime.Now.ToString("_yyyy_dd_MM_HH_mm_ss");
 
-            sfd.Filter = "CSV File | *.csv";
-
-            File_Name_CSV = sfd.FileName;
-
-            //DateTime dt;
-
-            using (sfd)
+            if (Record_Data == true)
             {
-                if (sfd.ShowDialog() == DialogResult.OK)
-                {
-                    //USB_Flags.FileName = sfd.FileName;
-                }
-                else
-                {
-                    // TODO: add error message
-                    return; 
-                }
 
+
+                sfd.FileName = "DAQ_USB_231" + DateTime.Now.ToString("_yyyy_dd_MM_HH_mm_ss");
+
+                sfd.Filter = "CSV File | *.csv";
+
+                File_Name_CSV = sfd.FileName;
+
+                //DateTime dt;
+
+                using (sfd)
+                {
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        //USB_Flags.FileName = sfd.FileName;
+                    }
+                    else
+                    {
+                        // TODO: add error message
+                        return;
+                    }
+
+                }
             }
 
             if (cmdStartConvert.Text == "Start")
             {
-                gbx_Setup_Amplifier.Enabled = false; 
+                gbx_Setup_Amplifier.Enabled = false;
                 gbx_Setup_DAQ.Enabled = false;
                 gbx_Setup_Display.Enabled = false;
 
@@ -214,7 +267,6 @@ namespace ULAI01
                 }
                 else
                 {
-                    // z is NOT a valid integer.
                     // error 
                     MessageBox.Show("Sampling rate not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
                     return;
@@ -227,7 +279,6 @@ namespace ULAI01
                 }
                 else
                 {
-                    // z is NOT a valid integer.
                     // error 
                     MessageBox.Show("Display sampling value not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
                     return;
@@ -240,21 +291,59 @@ namespace ULAI01
                 }
                 else
                 {
-                    // z is NOT a valid integer.
                     // error 
                     MessageBox.Show("Display Average value not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
                     return;
                 }
 
-
-                if (Record_Data == true)
+                if (int.TryParse(txtVoltageTreshDAQ.Text, out value))
                 {
-                    if (File_Name_CSV_SET == false)
-                    {
-                        
-                    }
+                    // x is indeed a valid integer, so value will be equal to 1234.
+                    VoltageTreshDAQ = value;
+                }
+                else
+                {
+                    // error 
+                    MessageBox.Show("Voltage Threshold DAQ not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
+                    return;
                 }
 
+                if (int.TryParse(txtTimeTreshDAQ.Text, out value))
+                {
+                    // x is indeed a valid integer, so value will be equal to 1234.
+                    TimeTreshDAQ = value;
+                }
+                else
+                {
+                    // error 
+                    MessageBox.Show("Time Threshold DAQ not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
+                    return;
+                }
+
+                if (int.TryParse(txtIntervalDAQ.Text, out value))
+                {
+                    // x is indeed a valid integer, so value will be equal to 1234.
+                    IntervalDAQ = value;
+                }
+                else
+                {
+                    // error 
+                    MessageBox.Show("Interval DAQ not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
+                    return;
+                }
+                if (int.TryParse(txtRecentIntervalRecord.Text, out value))
+                {
+                    // x is indeed a valid integer, so value will be equal to 1234.
+                    RecentSampleInterval = value;
+                }
+                else
+                {
+                    // error 
+                    MessageBox.Show("Interval Recent Recording not valid", "Setup error", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk);
+                    return;
+                }
+
+                // txtRecentIntervalRecord
                 ///////////////////////////////////////////////
                 /// Output set
                 /// 
@@ -268,7 +357,7 @@ namespace ULAI01
                     //    DataValue  :the value to send to Chan
 
                     ushort DataValue = 0;
-                    float OutVal;   
+                    float OutVal;
 
                     MccDaq.ErrorInfo ULStat = DaqBoard.FromEngUnits(Range, EngUnits, out DataValue);
 
@@ -278,13 +367,50 @@ namespace ULAI01
                     //lblVoltage.Text = "The voltage at DAC channel " + Chan.ToString("0") + " is:";
                     //lblShowValue.Text = DataValue.ToString("0");
                     OutVal = ConvertToVolts(DataValue);
-                    Voltage_ref = OutVal; 
+                    Voltage_ref = OutVal;
                     lblShowVoltage.Text = OutVal.ToString("0.0#####") + " Volts";
                 }
                 //////////////////////////////////////////////////////////////////////////////////////////
+                /// Output 2 set
+                /// 
+                IsValidNumber = float.TryParse(txtVoltsToSet2.Text, out EngUnits);
+
+                if (IsValidNumber)
+                {
+                    Chan = 1;
+                    //  Parameters:
+                    //    Chan       :the D/A output channel
+                    //    Range      :ignored if board does not have programmable rage
+                    //    DataValue  :the value to send to Chan
+
+                    ushort DataValue = 0;
+                    float OutVal;
+
+                    MccDaq.ErrorInfo ULStat = DaqBoard.FromEngUnits(Range, EngUnits, out DataValue);
+
+                    ULStat = DaqBoard.AOut(Chan, Range, DataValue);
+
+                    //lblValueSent.Text = "The count sent to DAC channel " + Chan.ToString("0") + " was:";
+                    //lblVoltage.Text = "The voltage at DAC channel " + Chan.ToString("0") + " is:";
+                    //lblShowValue.Text = DataValue.ToString("0");
+                    OutVal = ConvertToVolts(DataValue);
+                    Voltage_ref = OutVal;
+                    lblShowVoltage2.Visible = true; 
+                    lblShowVoltage2.Text = OutVal.ToString("0.0#####") + " Volts";
+                }
+                //////////////////////////////////////////////////////////////////////////////////////////
+
 
                 cmdStartConvert.Text = "Stop";
-                Start_Backworker(sfd); 
+                Start_Backworker(sfd);
+
+                if (Record_Data != true)
+                {
+                    rtbDisplay.AppendText("No data is being recorded" + "\r\n");
+                    rtbDisplay.ScrollToCaret();
+                }
+       
+            
             }
             else
             {
@@ -305,70 +431,10 @@ namespace ULAI01
                 gbx_Setup_Amplifier.Enabled = true;
                 gbx_Setup_DAQ.Enabled = true;
                 gbx_Setup_Display.Enabled = true;
+                lblShowVoltage2.Visible = false;
+                    
             }
-            //if (tmrConvert.Enabled)
-            //{
-            //    cmdStartConvert.Text = "Start";
-            //    tmrConvert.Enabled = false;
-            //    ///////////////////////////////////////////////////////////////
-            //    //if (backworker.IsBusy)
-            //    //{
-            //    //    //rtbDisplay.AppendText("Cancel Requested, please wait" + rs);
-            //    //    //rtbDisplay.ScrollToCaret();
-            //    //    //pgbProgram.Value = 0;
-            //    //    // Notify the worker thread that a cancel has been requested.
-            //    //    // The cancel will not actually happen until the thread in the
-            //    //    // DoWork checks the backworker.CancellationPending flag.
-            //    //    backworker.CancelAsync();
-            //    //}
-            //    ///////////////////////////////////////////////////////////////
-            //    chkRecordData.Enabled = true;
-
-            //}
-            //else
-            //{
-            //    cmdStartConvert.Text = "Stop";
-            //    //tmrConvert.Enabled = true;
-            //    ///////////////////////////////////////////////////////////////
-            //    //List<object> arguments = new List<object>();
-            //    //arguments.Add(UserCodeFormated); // 0
-            //    //arguments.Add(MCU);
-            //    //arguments.Add(Source);
-            //    //arguments.Add(Destination);
-            //    //arguments.Add(flags);
-
-            //    //backworker.RunWorkerAsync(arguments);
-            //    //backworker.RunWorkerAsync();
-
-            //    ///////////////////////////////////////////////////////////////
-            //    chkRecordData.Enabled = false; 
-            //    ///////////////////////////////////////////////
-            //    /// Output set
-            //    /// 
-            //    IsValidNumber = float.TryParse(txtVoltsToSet.Text, out EngUnits);
-
-            //    if (IsValidNumber)
-            //    {
-            //        //  Parameters:
-            //        //    Chan       :the D/A output channel
-            //        //    Range      :ignored if board does not have programmable rage
-            //        //    DataValue  :the value to send to Chan
-
-            //        ushort DataValue = 0;
-            //        float OutVal;
-
-            //        MccDaq.ErrorInfo ULStat = DaqBoard.FromEngUnits(Range, EngUnits, out DataValue);
-
-            //        ULStat = DaqBoard.AOut(Chan, Range, DataValue);
-
-            //        //lblValueSent.Text = "The count sent to DAC channel " + Chan.ToString("0") + " was:";
-            //        //lblVoltage.Text = "The voltage at DAC channel " + Chan.ToString("0") + " is:";
-            //        //lblShowValue.Text = DataValue.ToString("0");
-            //        OutVal = ConvertToVolts(DataValue);
-            //        lblShowVoltage.Text = OutVal.ToString("0.0#####") + " Volts";
-            //    }
-            //    //////////////////////////////////////////////////////////////////////////////////////////
-            //}
+          
 
         }
 
@@ -480,8 +546,6 @@ namespace ULAI01
             //tmrConvert.Start();
         }
 
-
-
         private void cmdStopConvert_Click(object eventSender, System.EventArgs eventArgs)
         {
 
@@ -528,13 +592,21 @@ namespace ULAI01
         {
             List<object> arguments = new List<object>();
 
-            arguments.Add(DataDaqList);     // 0
-            arguments.Add(File_Name_CSV);   // 1
-            arguments.Add(Sampling_Rate);   // 2
-            arguments.Add(Display_Rate);    // 3
-            arguments.Add(Display_Average); // 4
-            arguments.Add(Voltage_ref);     // 5
-            arguments.Add(sfd);     // 5
+            arguments.Add(DataDaqList);             // 0
+            arguments.Add(File_Name_CSV);           // 1
+            arguments.Add(Sampling_Rate);           // 2
+            arguments.Add(Display_Rate);            // 3
+            arguments.Add(Display_Average);         // 4
+            arguments.Add(Voltage_ref);             // 5
+            arguments.Add(sfd);                     // 6
+            arguments.Add(VoltageTreshDAQ);         // 7
+            arguments.Add(TimeTreshDAQ);            // 8
+            arguments.Add(IntervalDAQ);             // 9
+            arguments.Add(ThresholeRecording);      // 10
+            arguments.Add(Record_Data);             // 11
+            arguments.Add(RecentSampleRecording);   // 12
+            arguments.Add(RecentSampleInterval);    // 13
+            arguments.Add(Channel_Sel);             // 14
             backworker.RunWorkerAsync(arguments);
         }        
         
@@ -587,9 +659,32 @@ namespace ULAI01
         /// <param name="e"></param>
         void backworker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            //pgbProgram.Value = e.ProgressPercentage;
-            //rtbDisplay.AppendText(e.UserState + rs);
-            //rtbDisplay.ScrollToCaret();
+            string message = e.UserState.ToString();
+            float value = e.ProgressPercentage;
+            value = value / 1000;
+            if (message.Contains("Display update 1"))
+            {
+                lblShowVoltsCh0.Text = value.ToString("0.000"); 
+            }
+            if (message.Contains("Display update 2"))
+            {
+                lblShowVoltsCh1.Text = value.ToString("0.000");
+            }
+            if (message.Contains("Display update 3"))
+            {
+                lblShowVoltsCh2.Text = value.ToString("0.000");
+            }
+            if (message.Contains("Display update 4"))
+            {
+                lblShowVoltsCh3.Text = value.ToString("0.000");
+            }
+
+            if (message.Contains("Message"))
+            {
+                rtbDisplay.AppendText(message + "\r\n");
+                rtbDisplay.ScrollToCaret();
+            }
+
             
         }
 
@@ -611,11 +706,19 @@ namespace ULAI01
             int display_average_thread = (int)genericlist[4];               // 4
             float voltage_ref_thread = (float)genericlist[5];               // 5
             SaveFileDialog sfd_tread = (SaveFileDialog)genericlist[6];      // 6
+            int voltageTreshDAQ_thread = (int)genericlist[7];               // 7
+            int timeTreshDAQ_thread = (int)genericlist[8];                  // 8
+            int intervalDAQ_thread = (int)genericlist[9];                   // 9
+            bool thresholeRecording_thread = (bool)genericlist[10];         // 10
+            bool record_Data_thread = (bool)genericlist[11];                // 11
+            bool recentSampleRecording_thread = (bool)genericlist[12];      // 12
+            int recentSampleInterval_thread = (int)genericlist[13];         // 13
+            int chan_sel_thread = (int)genericlist[14];                     // 14
             ///////////////////////////////////////////////////////////////////////////////
             //int CounterType = Counters.clsCounters.CTRSCAN;
             int NumCtrs = 0;
             int CounterNum = 1; 
-            int numPoints = 1024;    //  Number of data points to collect
+            int numPoints = 512;    //  Number of data points to collect
             int FirstPoint = 0;     //  set first element in buffer to transfer to array
             int LastCtr;
             uint[] ADCData;             //  dimension an array to hold the input values
@@ -623,112 +726,141 @@ namespace ULAI01
             int CurIndex;
             int CurCount;
             short Status;
-            //Label lblInstruction = ;	//  define a variable to contain the handle for memory allocated 
-            //int rate = 25000;
             float EngUnits;
-            //double HighResEngUnits;
-            //MccDaq.ErrorInfo ULStat;
+            float value = 0;
             uint dataValue;
-            // Allocate memory buffer to hold data..
+            float old_value = 0;
+            float new_value = 0;
+            
+
+
+            int display_sampling_counter = 0;
+            int display_average_counter = 0;
+
             ADCData = new uint[numPoints];
             memHandle = MccDaq.MccService.WinBufAlloc32Ex(numPoints); //  set aside memory to hold data
-            //lblInstruction.Text = "Board " + DaqBoard.BoardNum.ToString() +
-            //    " collecting counter data on up to " + NumCtrs.ToString() +
-            //    " channels using CInScan.";
+
             LastCtr = CounterNum + NumCtrs - 1;
-            //this.txtLastCtr.Text = LastCtr.ToString();
-            //this.lblFirstCtr.Text = "Measure Counter " + CounterNum.ToString() + " to";
 
             MccDaq.ErrorInfo ULStat;
             MccDaq.ScanOptions options;
             MccDaq.Range range;
             range = MccDaq.Range.Bip10Volts;
             options = MccDaq.ScanOptions.Continuous | MccDaq.ScanOptions.Background;
+
+            int number_Channel_Sampling = 1; 
+
+            //chan_sel_thread = 15; // debug override
+            //recentSampleRecording_thread = true;// debug override
+            //record_Data_thread = true; // debug override
+
+            if (chan_sel_thread == 1)
+            {
+                ULStat = DaqBoard.AInScan(0, 0, numPoints, ref rate_thread, range, memHandle, options);
+                number_Channel_Sampling = 1; 
+            }
+            else if (chan_sel_thread == 3)
+            {
+                ULStat = DaqBoard.AInScan(0, 3, numPoints, ref rate_thread, range, memHandle, options);
+                number_Channel_Sampling = 2;
+            }
+            else if (chan_sel_thread == 7)
+            {
+                ULStat = DaqBoard.AInScan(0, 5, numPoints, ref rate_thread, range, memHandle, options);
+                number_Channel_Sampling = 3;
+            }
+            else if (chan_sel_thread == 15)
+            {
+                ULStat = DaqBoard.AInScan(0, 7, numPoints, ref rate_thread, range, memHandle, options);
+                number_Channel_Sampling = 4;
+                //ULStat = DaqBoard.AInScan(0, 3, numPoints, ref rate_thread, range, memHandle, options);
+                //ULStat = DaqBoard.AInScan(0, 0, numPoints, ref rate_thread, range, memHandle, options);
+            }
+            else
+            {
+
+                ULStat = DaqBoard.AInScan(0, 0, numPoints, ref rate_thread, range, memHandle, options);
+            }
+
             
-            //MccDaq.FunctionType function;
-            //function = MccDaq.FunctionType.AiFunction;
-
-
-            ULStat = DaqBoard.AInScan(0, 0, numPoints, ref rate_thread, range, memHandle, options);
 
             ULStat = DaqBoard.GetStatus(out Status, out CurCount, out CurIndex, MccDaq.FunctionType.AiFunction);
 
             if(Status == MccDaq.MccBoard.Running)
             {
-                worker.ReportProgress(1, "Background command started");
+                worker.ReportProgress(0, "Message: Background command started");
             }
             else
             {
-                worker.ReportProgress(1, "Background command broken");
+                worker.ReportProgress(0, "Message: Background command broken");
             }
 
-            //StreamWriter sw = new StreamWriter(file_name_thread + ".csv");
-            //StreamWriter sw = File.CreateText(file_name_thread + ".csv"); 
-            using (StreamWriter sw = File.CreateText(sfd_tread.FileName))
-            {
-                sw.WriteLine(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt"));
-                sw.WriteLine("Reference voltage = " + voltage_ref_thread + " Volts");
-                sw.WriteLine("Time, Data ADC, Ref offset");
 
+            if(record_Data_thread == false)
+            {
+                float[] fv = new float[4];
                 while (true)
                 {
                     //Thread.Sleep(1); 
 
                     ULStat = DaqBoard.GetStatus(out Status, out CurCount, out CurIndex, MccDaq.FunctionType.AiFunction);
 
-                    if (CurCount > 63) // half size buffer
+                    if (CurCount > 127) // half size buffer
                     {
-                        //ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, numPoints);
-                        // ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, ADCData.Length);
-                        ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, 128);
+
+                        ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, 512);
 
                         //string time_last_sample = DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt");
-                        string time_last_sample = DateTime.Now.ToString("mm:ss.fffffff tt");
-                        for (int i = 0; i < 128; i++) // ADCData.Length
+                        //string time_last_sample = DateTime.Now.ToString("mm:ss.fffffff tt");
+                        for (int i = 0; i < 256; i = (i + 4)) // ADCData.Length
                         {
                             //dataDaqList_thread.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt") + "," + ADCData[i].ToString());
 
-                            dataValue = ADCData[i];
-
-                            ULStat = DaqBoard.ToEngUnits(Range, (Int16)dataValue, out EngUnits);
-
-                            //dataDaqList_thread.Add(time_last_sample + "," + ADCData[i].ToString());
-
-                            //dataDaqList_thread.Add(time_last_sample + "," + EngUnits.ToString() + "," + voltage_ref_thread);
-
-                            if(i<127)
+                            for (int j = 0; j < 4; j++)
                             {
-                                //sw.WriteLine(i + "," + EngUnits.ToString() + "," + voltage_ref_thread);
-                                sw.WriteLine(i + "," + EngUnits.ToString());
+                                dataValue = ADCData[i + j];
+                                ULStat = DaqBoard.ToEngUnits(Range, (Int16)dataValue, out EngUnits);
+                                fv[j] = EngUnits;
+                                //cclBuffer[i] += EngUnits.ToString();
                             }
-                            else
-                            {
-                                //sw.WriteLine(time_last_sample + "," + EngUnits.ToString() + "," + voltage_ref_thread);
-                                sw.WriteLine(time_last_sample + "," + EngUnits.ToString());
-                            }
-                            
+
 
                         }
-                    }
-                    else
-                    {
-                        //if(dataDaqList_thread.Count > 0)
-                        //{
-                        //    try
-                        //    {
-                        //        for(int i = 0; i< dataDaqList_thread.Count;i++)
-                        //        {
 
-                        //            sw.WriteLine(dataDaqList_thread[i]);
-                        //        }
-
-                        //        dataDaqList_thread.Clear(); 
-                        //    }
-                        //    catch
-                        //    {
-                        //        // error 
-                        //    }
-                        //}
+                        display_sampling_counter++;
+                        if (rate_thread / display_sampling_thread < display_sampling_counter)
+                        {
+                            display_sampling_counter = 0;
+                            switch (number_Channel_Sampling)
+                            {
+                                case 1:
+                                    worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                    //worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                    //worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                    //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                    break;
+                                case 2:
+                                    worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                    worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                    //worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                    //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                    break;
+                                case 3:
+                                    worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                    worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                    worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                    //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                    break;
+                                case 4:
+                                    worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                    worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                    worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                    worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
 
 
@@ -740,11 +872,323 @@ namespace ULAI01
 
                         ULStat = DaqBoard.StopBackground(MccDaq.FunctionType.AiFunction);
                         e.Result = BackgroundWorkerReportComplete("Cancel");
-                        sw.Close();
+                        //sw.Close();
                         return;
                     }
                 }
             }
+            else
+            {
+
+                if (recentSampleRecording_thread == true)
+                {
+                    int time_window = rate_thread * recentSampleInterval_thread * 100;
+                    string[] cclBuffer = new string[time_window];
+                    int cclBufferPointer = 0;
+                    
+
+                    float[] fv = new float[number_Channel_Sampling]; 
+                    
+
+                    while(true)
+                    {
+                        ULStat = DaqBoard.GetStatus(out Status, out CurCount, out CurIndex, MccDaq.FunctionType.AiFunction);
+
+                        if (CurCount > 127) // half size buffer
+                        {
+                            ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, 512);
+
+                            //string time_last_sample = DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt");
+                            string time_last_sample = DateTime.Now.ToString("mm:ss.fffffff tt");
+                            for (int i = 0; i < 256; i=(i+ number_Channel_Sampling)) // ADCData.Length
+                            {
+                                //dataDaqList_thread.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt") + "," + ADCData[i].ToString());
+                                //cclBuffer[i] = ""; 
+                                for (int j = 0; j < number_Channel_Sampling; j++)
+                                {
+                                    dataValue = ADCData[i+j];
+                                    ULStat = DaqBoard.ToEngUnits(Range, (Int16)dataValue, out EngUnits);
+                                    fv[j] = EngUnits;
+                                    //cclBuffer[i] += EngUnits.ToString();
+                                }
+
+                                if(i >= (256 - number_Channel_Sampling))
+                                {
+                                    switch(number_Channel_Sampling)
+                                    {
+                                        case 1:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + time_last_sample + "," + i;
+                                            break;
+                                        case 2:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") + "," +
+                                            time_last_sample + "," + i;
+                                            break;
+                                        case 3:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") + "," +
+                                        fv[2].ToString("0.000") + "," + time_last_sample + "," + i;
+                                            break;
+                                        case 4:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") + "," +
+                                            fv[2].ToString("0.000") + "," + fv[3].ToString("0.000") + "," + time_last_sample + "," + i;
+                                            break;
+                                        default:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + time_last_sample + "," + i;
+                                            break;
+                                    }
+                                    
+                                }
+                                else
+                                {
+                                    switch (number_Channel_Sampling)
+                                    {
+                                        case 1:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + "" + "," + i;
+                                            break;
+                                        case 2:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") 
+                                                + "," + "" + "," + i;
+                                            break;
+                                        case 3:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") + "," +
+                                        fv[2].ToString("0.000") + "," + "" + "," + i;
+                                            break;
+                                        case 4:
+                                            cclBuffer[cclBufferPointer] = fv[0].ToString("0.000") + "," + fv[1].ToString("0.000") + "," +
+                                        fv[2].ToString("0.000") + "," + fv[3].ToString("0.000") + "," + "" + "," + i;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    
+                                }
+                               
+                                
+                                
+                                cclBufferPointer++; 
+
+                                if(cclBufferPointer >= time_window)
+                                {
+                                    cclBufferPointer = 0; 
+                                }
+
+
+                            }
+
+                            display_sampling_counter++;
+                            if (rate_thread / display_sampling_thread < display_sampling_counter)
+                            {
+                                display_sampling_counter = 0;
+                                switch(number_Channel_Sampling)
+                                {
+                                    case 1:
+                                        worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                        //worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                        //worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                        //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                        break;
+                                    case 2:
+                                        worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                        worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                        //worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                        //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                        break;
+                                    case 3:
+                                        worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                        worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                        worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                        //worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                        break;
+                                    case 4:
+                                        worker.ReportProgress((int)(fv[0] * 1000), "Display update 1");
+                                        worker.ReportProgress((int)(fv[1] * 1000), "Display update 2");
+                                        worker.ReportProgress((int)(fv[2] * 1000), "Display update 3");
+                                        worker.ReportProgress((int)(fv[3] * 1000), "Display update 4");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                
+                            }
+                        }
+
+
+
+                        if (worker.CancellationPending)
+                        {
+                            ULStat = DaqBoard.StopBackground(MccDaq.FunctionType.AiFunction);
+                            using (StreamWriter sw = File.CreateText(sfd_tread.FileName))
+                            {
+                                sw.WriteLine(DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt"));
+                                sw.WriteLine("Reference voltage = " + voltage_ref_thread + " Volts");
+                                sw.WriteLine("Time, Data ADC, Ref offset");
+
+                                for (int i = 0; i < time_window; i++)
+                                {
+                                    sw.WriteLine(cclBuffer[cclBufferPointer]);
+                                    cclBufferPointer++; 
+
+                                    if (cclBufferPointer >= time_window)
+                                    {
+                                        cclBufferPointer = 0;
+                                    }
+                                }
+
+                                sw.Close();
+                            }
+                                
+                            
+                            
+                            e.Result = BackgroundWorkerReportComplete("Cancel");
+                            //sw.Close();
+                            return;
+                        }
+                    }
+
+
+                }
+                else if (thresholeRecording_thread)
+                {
+                    int threshole_counter = 0;
+                    int threshole_max_count = rate_thread / timeTreshDAQ_thread / 1000;
+                    int time_window = rate_thread * intervalDAQ_thread;
+                    int cclBufferPointer = 0;
+                    string[] cclBuffer = new string[time_window];
+                    //StreamWriter sw = new StreamWriter(file_name_thread + ".csv");
+                    //StreamWriter sw = File.CreateText(file_name_thread + ".csv"); 
+                    using (StreamWriter sw = File.CreateText(sfd_tread.FileName))
+                    {
+                        sw.WriteLine(DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fffffff tt"));
+                        sw.WriteLine("Reference voltage = " + voltage_ref_thread + " Volts");
+                        sw.WriteLine("Time, Data ADC, Ref offset");
+
+                        while (true)
+                        {
+                            //Thread.Sleep(1); 
+
+                            ULStat = DaqBoard.GetStatus(out Status, out CurCount, out CurIndex, MccDaq.FunctionType.AiFunction);
+
+                            if (CurCount > 63) // half size buffer
+                            {
+                                //ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, numPoints);
+                                // ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, ADCData.Length);
+                                ULStat = MccDaq.MccService.WinBufToArray32(memHandle, ADCData, FirstPoint, 128);
+
+                                //string time_last_sample = DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt");
+                                string time_last_sample = DateTime.Now.ToString("mm:ss.fffffff tt");
+                                for (int i = 0; i < 128; i++) // ADCData.Length
+                                {
+                                    //dataDaqList_thread.Add(DateTime.Now.ToString("MM / dd / yyyy hh: mm:ss.fffffff tt") + "," + ADCData[i].ToString());
+
+                                    dataValue = ADCData[i];
+                                    ULStat = DaqBoard.ToEngUnits(Range, (Int16)dataValue, out EngUnits);
+                                    value = EngUnits;
+
+
+                                    //dataDaqList_thread.Add(time_last_sample + "," + ADCData[i].ToString());
+
+                                    //dataDaqList_thread.Add(time_last_sample + "," + EngUnits.ToString() + "," + voltage_ref_thread);
+
+                                    if (thresholeRecording_thread == true)
+                                    {
+                                        // write only time window sample to text file
+                                        new_value = EngUnits;
+                                        if (Math.Abs(new_value - old_value) > voltageTreshDAQ_thread)
+                                        {
+                                            threshole_counter++;
+                                            if (threshole_counter > threshole_max_count)
+                                            {
+                                                threshole_counter = 0;
+                                            }
+                                            else
+                                            {
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (i < 127)
+                                            {
+                                                cclBuffer[cclBufferPointer] = EngUnits.ToString("0.000");
+                                            }
+                                            else
+                                            {
+
+                                                cclBuffer[cclBufferPointer] = EngUnits.ToString("0.000") + "," + time_last_sample;
+                                            }
+                                            cclBufferPointer++;
+                                            if (cclBufferPointer >= time_window)
+                                            {
+                                                cclBufferPointer = 0;
+                                            }
+                                            threshole_counter = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // write all sample to text file
+                                        if (i < 127)
+                                        {
+                                            //sw.WriteLine(i + "," + EngUnits.ToString() + "," + voltage_ref_thread);
+                                            //sw.WriteLine(i + "," + EngUnits.ToString("0.000"));
+                                            sw.WriteLine(EngUnits.ToString("0.000"));
+                                        }
+                                        else
+                                        {
+                                            //sw.WriteLine(time_last_sample + "," + EngUnits.ToString() + "," + voltage_ref_thread);
+                                            //sw.WriteLine(time_last_sample + "," + EngUnits.ToString("0.000"));
+                                            sw.WriteLine(EngUnits.ToString("0.000") + "," + time_last_sample);
+                                        }
+                                    }
+
+
+
+                                }
+
+                                display_sampling_counter++;
+                                if (rate_thread / display_sampling_thread < display_sampling_counter)
+                                {
+                                    display_sampling_counter = 0;
+                                    worker.ReportProgress((int)(value * 1000), "Display update");
+                                }
+                            }
+                            else
+                            {
+                                //if(dataDaqList_thread.Count > 0)
+                                //{
+                                //    try
+                                //    {
+                                //        for(int i = 0; i< dataDaqList_thread.Count;i++)
+                                //        {
+
+                                //            sw.WriteLine(dataDaqList_thread[i]);
+                                //        }
+
+                                //        dataDaqList_thread.Clear(); 
+                                //    }
+                                //    catch
+                                //    {
+                                //        // error 
+                                //    }
+                                //}
+                            }
+
+
+
+                            if (worker.CancellationPending)
+                            {
+                                //int StopBackground(0, 0); // stop continuous
+                                //MccDaq.MccBoard.StopBackground(function);
+
+                                ULStat = DaqBoard.StopBackground(MccDaq.FunctionType.AiFunction);
+                                e.Result = BackgroundWorkerReportComplete("Cancel");
+                                sw.Close();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
         }
 
         private object BackgroundWorkerReportComplete(string game_over)
@@ -794,7 +1238,6 @@ namespace ULAI01
             this.label1 = new System.Windows.Forms.Label();
             this.lblShowVoltage = new System.Windows.Forms.Label();
             this.gbx_Setup_Amplifier = new System.Windows.Forms.GroupBox();
-            this.chkRecordData = new System.Windows.Forms.CheckBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -803,11 +1246,20 @@ namespace ULAI01
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.lblInitForce = new System.Windows.Forms.Label();
+            this.chkRecordData = new System.Windows.Forms.CheckBox();
             this.txtDistance = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtForce = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.lblShowVoltsCh3 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.txt_File_Name = new System.Windows.Forms.TextBox();
+            this.lblShowVoltage2 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.txtVoltsToSet2 = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -815,29 +1267,50 @@ namespace ULAI01
             this.btnTest = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.rtbDisplay = new System.Windows.Forms.RichTextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.gbx_Setup_DAQ = new System.Windows.Forms.GroupBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.txt_DAQ_Setup_Name = new System.Windows.Forms.TextBox();
-            this.txt_DAQ_Setup_Sampling_Rate = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
             this.gbx_Setup_Display = new System.Windows.Forms.GroupBox();
-            this.txt_Display_Sampling = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.txt_File_Name = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
             this.txt_Display_Average = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.txt_Display_Sampling = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.gbx_Setup_DAQ = new System.Windows.Forms.GroupBox();
+            this.chkChEnable2 = new System.Windows.Forms.CheckBox();
+            this.chkChEnable3 = new System.Windows.Forms.CheckBox();
+            this.chkChEnable1 = new System.Windows.Forms.CheckBox();
+            this.chkChEnable0 = new System.Windows.Forms.CheckBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.txtIntervalDAQ = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.txtTimeTreshDAQ = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.txtVoltageTreshDAQ = new System.Windows.Forms.TextBox();
+            this.chkThresRecord = new System.Windows.Forms.CheckBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.txt_DAQ_Setup_Sampling_Rate = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.txt_DAQ_Setup_Name = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.txtRecentIntervalRecord = new System.Windows.Forms.TextBox();
+            this.chkRecentRecord = new System.Windows.Forms.CheckBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
             this.gbx_Setup_Amplifier.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            this.gbx_Setup_DAQ.SuspendLayout();
             this.gbx_Setup_Display.SuspendLayout();
+            this.gbx_Setup_DAQ.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmdStartConvert
@@ -846,7 +1319,7 @@ namespace ULAI01
             this.cmdStartConvert.Cursor = System.Windows.Forms.Cursors.Default;
             this.cmdStartConvert.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmdStartConvert.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cmdStartConvert.Location = new System.Drawing.Point(141, 405);
+            this.cmdStartConvert.Location = new System.Drawing.Point(143, 571);
             this.cmdStartConvert.Name = "cmdStartConvert";
             this.cmdStartConvert.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cmdStartConvert.Size = new System.Drawing.Size(52, 26);
@@ -861,7 +1334,7 @@ namespace ULAI01
             this.cmdStopConvert.Cursor = System.Windows.Forms.Cursors.Default;
             this.cmdStopConvert.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmdStopConvert.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cmdStopConvert.Location = new System.Drawing.Point(303, 405);
+            this.cmdStopConvert.Location = new System.Drawing.Point(305, 571);
             this.cmdStopConvert.Name = "cmdStopConvert";
             this.cmdStopConvert.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cmdStopConvert.Size = new System.Drawing.Size(52, 26);
@@ -902,6 +1375,7 @@ namespace ULAI01
             this.lblShowVoltsCh0.TabIndex = 8;
             this.lblShowVoltsCh0.Text = "value";
             this.lblShowVoltsCh0.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblShowVoltsCh0.Click += new System.EventHandler(this.lblShowVoltsCh0_Click);
             // 
             // lblVoltsRead
             // 
@@ -1035,7 +1509,7 @@ namespace ULAI01
             this.label3.Cursor = System.Windows.Forms.Cursors.Default;
             this.label3.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.label3.Location = new System.Drawing.Point(20, 114);
+            this.label3.Location = new System.Drawing.Point(23, 41);
             this.label3.Name = "label3";
             this.label3.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.label3.Size = new System.Drawing.Size(113, 16);
@@ -1060,7 +1534,7 @@ namespace ULAI01
             // txtVoltsToSet
             // 
             this.txtVoltsToSet.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.txtVoltsToSet.Location = new System.Drawing.Point(157, 113);
+            this.txtVoltsToSet.Location = new System.Drawing.Point(152, 38);
             this.txtVoltsToSet.Name = "txtVoltsToSet";
             this.txtVoltsToSet.Size = new System.Drawing.Size(58, 20);
             this.txtVoltsToSet.TabIndex = 16;
@@ -1071,7 +1545,7 @@ namespace ULAI01
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.label1.Location = new System.Drawing.Point(221, 116);
+            this.label1.Location = new System.Drawing.Point(216, 41);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 14);
             this.label1.TabIndex = 17;
@@ -1079,11 +1553,10 @@ namespace ULAI01
             // 
             // lblShowVoltage
             // 
-            this.lblShowVoltage.AutoSize = true;
             this.lblShowVoltage.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.lblShowVoltage.Location = new System.Drawing.Point(267, 116);
+            this.lblShowVoltage.Location = new System.Drawing.Point(262, 41);
             this.lblShowVoltage.Name = "lblShowVoltage";
-            this.lblShowVoltage.Size = new System.Drawing.Size(0, 14);
+            this.lblShowVoltage.Size = new System.Drawing.Size(43, 14);
             this.lblShowVoltage.TabIndex = 18;
             // 
             // gbx_Setup_Amplifier
@@ -1096,30 +1569,18 @@ namespace ULAI01
             this.gbx_Setup_Amplifier.Controls.Add(this.textBox1);
             this.gbx_Setup_Amplifier.Controls.Add(this.label5);
             this.gbx_Setup_Amplifier.Controls.Add(this.lblInitForce);
-            this.gbx_Setup_Amplifier.Location = new System.Drawing.Point(43, 27);
+            this.gbx_Setup_Amplifier.Location = new System.Drawing.Point(43, 16);
             this.gbx_Setup_Amplifier.Name = "gbx_Setup_Amplifier";
-            this.gbx_Setup_Amplifier.Size = new System.Drawing.Size(332, 137);
+            this.gbx_Setup_Amplifier.Size = new System.Drawing.Size(332, 102);
             this.gbx_Setup_Amplifier.TabIndex = 19;
             this.gbx_Setup_Amplifier.TabStop = false;
             this.gbx_Setup_Amplifier.Text = "Setup Amplifier";
-            // 
-            // chkRecordData
-            // 
-            this.chkRecordData.AutoSize = true;
-            this.chkRecordData.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.chkRecordData.Location = new System.Drawing.Point(26, 151);
-            this.chkRecordData.Name = "chkRecordData";
-            this.chkRecordData.Size = new System.Drawing.Size(112, 18);
-            this.chkRecordData.TabIndex = 8;
-            this.chkRecordData.Text = "Record Raw Data";
-            this.chkRecordData.UseVisualStyleBackColor = true;
-            this.chkRecordData.CheckedChanged += new System.EventHandler(this.chkRecordData_CheckedChanged);
             // 
             // textBox3
             // 
             this.textBox3.Enabled = false;
             this.textBox3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.textBox3.Location = new System.Drawing.Point(191, 88);
+            this.textBox3.Location = new System.Drawing.Point(191, 66);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(67, 20);
             this.textBox3.TabIndex = 7;
@@ -1130,7 +1591,7 @@ namespace ULAI01
             // 
             this.textBox4.Enabled = false;
             this.textBox4.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.textBox4.Location = new System.Drawing.Point(191, 51);
+            this.textBox4.Location = new System.Drawing.Point(191, 38);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(67, 20);
             this.textBox4.TabIndex = 6;
@@ -1141,7 +1602,7 @@ namespace ULAI01
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.label7.Location = new System.Drawing.Point(211, 32);
+            this.label7.Location = new System.Drawing.Point(211, 19);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(31, 14);
             this.label7.TabIndex = 5;
@@ -1151,7 +1612,7 @@ namespace ULAI01
             // 
             this.textBox2.Enabled = false;
             this.textBox2.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.textBox2.Location = new System.Drawing.Point(107, 88);
+            this.textBox2.Location = new System.Drawing.Point(107, 66);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(67, 20);
             this.textBox2.TabIndex = 4;
@@ -1162,7 +1623,7 @@ namespace ULAI01
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.label6.Location = new System.Drawing.Point(43, 91);
+            this.label6.Location = new System.Drawing.Point(43, 69);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(66, 14);
             this.label6.TabIndex = 3;
@@ -1172,7 +1633,7 @@ namespace ULAI01
             // 
             this.textBox1.Enabled = false;
             this.textBox1.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.textBox1.Location = new System.Drawing.Point(107, 51);
+            this.textBox1.Location = new System.Drawing.Point(107, 38);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(67, 20);
             this.textBox1.TabIndex = 2;
@@ -1183,7 +1644,7 @@ namespace ULAI01
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.label5.Location = new System.Drawing.Point(104, 32);
+            this.label5.Location = new System.Drawing.Point(104, 19);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(78, 14);
             this.label5.TabIndex = 1;
@@ -1193,17 +1654,29 @@ namespace ULAI01
             // 
             this.lblInitForce.AutoSize = true;
             this.lblInitForce.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold);
-            this.lblInitForce.Location = new System.Drawing.Point(43, 54);
+            this.lblInitForce.Location = new System.Drawing.Point(43, 41);
             this.lblInitForce.Name = "lblInitForce";
             this.lblInitForce.Size = new System.Drawing.Size(50, 14);
             this.lblInitForce.TabIndex = 0;
             this.lblInitForce.Text = "Force = ";
             // 
+            // chkRecordData
+            // 
+            this.chkRecordData.AutoSize = true;
+            this.chkRecordData.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.chkRecordData.Location = new System.Drawing.Point(22, 145);
+            this.chkRecordData.Name = "chkRecordData";
+            this.chkRecordData.Size = new System.Drawing.Size(112, 18);
+            this.chkRecordData.TabIndex = 8;
+            this.chkRecordData.Text = "Record Raw Data";
+            this.chkRecordData.UseVisualStyleBackColor = true;
+            this.chkRecordData.CheckedChanged += new System.EventHandler(this.chkRecordData_CheckedChanged);
+            // 
             // txtDistance
             // 
             this.txtDistance.Enabled = false;
             this.txtDistance.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.txtDistance.Location = new System.Drawing.Point(81, 59);
+            this.txtDistance.Location = new System.Drawing.Point(81, 44);
             this.txtDistance.Name = "txtDistance";
             this.txtDistance.Size = new System.Drawing.Size(67, 20);
             this.txtDistance.TabIndex = 11;
@@ -1214,7 +1687,7 @@ namespace ULAI01
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.label8.Location = new System.Drawing.Point(17, 62);
+            this.label8.Location = new System.Drawing.Point(17, 47);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(61, 14);
             this.label8.TabIndex = 10;
@@ -1224,18 +1697,19 @@ namespace ULAI01
             // 
             this.txtForce.Enabled = false;
             this.txtForce.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.txtForce.Location = new System.Drawing.Point(81, 33);
+            this.txtForce.Location = new System.Drawing.Point(81, 18);
             this.txtForce.Name = "txtForce";
             this.txtForce.Size = new System.Drawing.Size(67, 20);
             this.txtForce.TabIndex = 9;
             this.txtForce.Text = "0";
             this.txtForce.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtForce.TextChanged += new System.EventHandler(this.txtForce_TextChanged);
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.label9.Location = new System.Drawing.Point(17, 36);
+            this.label9.Location = new System.Drawing.Point(17, 21);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(47, 14);
             this.label9.TabIndex = 8;
@@ -1243,6 +1717,8 @@ namespace ULAI01
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.label27);
+            this.groupBox2.Controls.Add(this.lblShowVoltsCh3);
             this.groupBox2.Controls.Add(this.label17);
             this.groupBox2.Controls.Add(this.txt_File_Name);
             this.groupBox2.Controls.Add(this.chkRecordData);
@@ -1250,19 +1726,103 @@ namespace ULAI01
             this.groupBox2.Controls.Add(this.lblShowVoltsCh0);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.lblShowVoltsCh1);
-            this.groupBox2.Controls.Add(this.lblShowVoltage);
             this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.lblShowVoltsCh2);
-            this.groupBox2.Controls.Add(this.label1);
-            this.groupBox2.Controls.Add(this.txtVoltsToSet);
             this.groupBox2.Location = new System.Drawing.Point(45, 28);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(332, 238);
+            this.groupBox2.Size = new System.Drawing.Size(332, 208);
             this.groupBox2.TabIndex = 20;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Raw Value - Debug";
+            this.groupBox2.Text = "Voltage Input";
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
+            // 
+            // label27
+            // 
+            this.label27.BackColor = System.Drawing.SystemColors.Window;
+            this.label27.Cursor = System.Windows.Forms.Cursors.Default;
+            this.label27.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label27.Location = new System.Drawing.Point(21, 114);
+            this.label27.Name = "label27";
+            this.label27.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.label27.Size = new System.Drawing.Size(128, 16);
+            this.label27.TabIndex = 25;
+            this.label27.Text = "Value voltage channel 3:";
+            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblShowVoltsCh3
+            // 
+            this.lblShowVoltsCh3.BackColor = System.Drawing.SystemColors.Window;
+            this.lblShowVoltsCh3.Cursor = System.Windows.Forms.Cursors.Default;
+            this.lblShowVoltsCh3.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblShowVoltsCh3.ForeColor = System.Drawing.Color.Blue;
+            this.lblShowVoltsCh3.Location = new System.Drawing.Point(153, 114);
+            this.lblShowVoltsCh3.Name = "lblShowVoltsCh3";
+            this.lblShowVoltsCh3.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.lblShowVoltsCh3.Size = new System.Drawing.Size(80, 16);
+            this.lblShowVoltsCh3.TabIndex = 26;
+            this.lblShowVoltsCh3.Text = "value";
+            this.lblShowVoltsCh3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(20, 172);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(72, 14);
+            this.label17.TabIndex = 20;
+            this.label17.Text = "File Name = ";
+            // 
+            // txt_File_Name
+            // 
+            this.txt_File_Name.Enabled = false;
+            this.txt_File_Name.Location = new System.Drawing.Point(98, 169);
+            this.txt_File_Name.Name = "txt_File_Name";
+            this.txt_File_Name.Size = new System.Drawing.Size(212, 20);
+            this.txt_File_Name.TabIndex = 19;
+            // 
+            // lblShowVoltage2
+            // 
+            this.lblShowVoltage2.AutoSize = true;
+            this.lblShowVoltage2.Location = new System.Drawing.Point(260, 72);
+            this.lblShowVoltage2.Name = "lblShowVoltage2";
+            this.lblShowVoltage2.Size = new System.Drawing.Size(45, 14);
+            this.lblShowVoltage2.TabIndex = 24;
+            this.lblShowVoltage2.Text = "label27";
+            this.lblShowVoltage2.Visible = false;
+            // 
+            // label25
+            // 
+            this.label25.BackColor = System.Drawing.SystemColors.Window;
+            this.label25.Cursor = System.Windows.Forms.Cursors.Default;
+            this.label25.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label25.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label25.Location = new System.Drawing.Point(14, 71);
+            this.label25.Name = "label25";
+            this.label25.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.label25.Size = new System.Drawing.Size(128, 16);
+            this.label25.TabIndex = 21;
+            this.label25.Text = "Value voltage Output 2:";
+            this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.label26.Location = new System.Drawing.Point(216, 72);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(31, 14);
+            this.label26.TabIndex = 23;
+            this.label26.Text = "Volts";
+            // 
+            // txtVoltsToSet2
+            // 
+            this.txtVoltsToSet2.Font = new System.Drawing.Font("Arial", 8.25F);
+            this.txtVoltsToSet2.Location = new System.Drawing.Point(152, 69);
+            this.txtVoltsToSet2.Name = "txtVoltsToSet2";
+            this.txtVoltsToSet2.Size = new System.Drawing.Size(58, 20);
+            this.txtVoltsToSet2.TabIndex = 22;
+            this.txtVoltsToSet2.Text = "0";
             // 
             // groupBox3
             // 
@@ -1272,18 +1832,18 @@ namespace ULAI01
             this.groupBox3.Controls.Add(this.txtForce);
             this.groupBox3.Controls.Add(this.txtDistance);
             this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Location = new System.Drawing.Point(45, 284);
+            this.groupBox3.Location = new System.Drawing.Point(34, 30);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(332, 100);
+            this.groupBox3.Size = new System.Drawing.Size(332, 78);
             this.groupBox3.TabIndex = 21;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Output";
+            this.groupBox3.Text = "Force Calculation";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.label11.Location = new System.Drawing.Point(154, 62);
+            this.label11.Location = new System.Drawing.Point(154, 47);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(39, 14);
             this.label11.TabIndex = 13;
@@ -1293,7 +1853,7 @@ namespace ULAI01
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Arial", 8.25F);
-            this.label10.Location = new System.Drawing.Point(154, 36);
+            this.label10.Location = new System.Drawing.Point(154, 21);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(25, 14);
             this.label10.TabIndex = 12;
@@ -1305,7 +1865,7 @@ namespace ULAI01
             this.btnExportData.Cursor = System.Windows.Forms.Cursors.Default;
             this.btnExportData.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnExportData.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnExportData.Location = new System.Drawing.Point(210, 405);
+            this.btnExportData.Location = new System.Drawing.Point(212, 571);
             this.btnExportData.Name = "btnExportData";
             this.btnExportData.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.btnExportData.Size = new System.Drawing.Size(52, 26);
@@ -1320,7 +1880,7 @@ namespace ULAI01
             this.btnTest.Cursor = System.Windows.Forms.Cursors.Default;
             this.btnTest.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnTest.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnTest.Location = new System.Drawing.Point(45, 405);
+            this.btnTest.Location = new System.Drawing.Point(47, 571);
             this.btnTest.Name = "btnTest";
             this.btnTest.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.btnTest.Size = new System.Drawing.Size(52, 26);
@@ -1333,15 +1893,17 @@ namespace ULAI01
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(1, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(436, 508);
+            this.tabControl1.Size = new System.Drawing.Size(436, 657);
             this.tabControl1.TabIndex = 24;
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.groupBox3);
+            this.tabPage1.Controls.Add(this.groupBox1);
+            this.tabPage1.Controls.Add(this.rtbDisplay);
             this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.btnTest);
             this.tabPage1.Controls.Add(this.btnExportData);
@@ -1350,10 +1912,36 @@ namespace ULAI01
             this.tabPage1.Location = new System.Drawing.Point(4, 23);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(428, 481);
+            this.tabPage1.Size = new System.Drawing.Size(428, 630);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Measurement";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.lblShowVoltage);
+            this.groupBox1.Controls.Add(this.lblShowVoltage2);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.txtVoltsToSet);
+            this.groupBox1.Controls.Add(this.label25);
+            this.groupBox1.Controls.Add(this.txtVoltsToSet2);
+            this.groupBox1.Controls.Add(this.label26);
+            this.groupBox1.Location = new System.Drawing.Point(45, 258);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(332, 109);
+            this.groupBox1.TabIndex = 25;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Voltage Output";
+            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
+            // 
+            // rtbDisplay
+            // 
+            this.rtbDisplay.Location = new System.Drawing.Point(45, 390);
+            this.rtbDisplay.Name = "rtbDisplay";
+            this.rtbDisplay.Size = new System.Drawing.Size(332, 166);
+            this.rtbDisplay.TabIndex = 24;
+            this.rtbDisplay.Text = "";
             // 
             // tabPage2
             // 
@@ -1363,60 +1951,10 @@ namespace ULAI01
             this.tabPage2.Location = new System.Drawing.Point(4, 23);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(428, 481);
+            this.tabPage2.Size = new System.Drawing.Size(428, 630);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Setup";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // gbx_Setup_DAQ
-            // 
-            this.gbx_Setup_DAQ.Controls.Add(this.label15);
-            this.gbx_Setup_DAQ.Controls.Add(this.txt_DAQ_Setup_Sampling_Rate);
-            this.gbx_Setup_DAQ.Controls.Add(this.label13);
-            this.gbx_Setup_DAQ.Controls.Add(this.txt_DAQ_Setup_Name);
-            this.gbx_Setup_DAQ.Controls.Add(this.label12);
-            this.gbx_Setup_DAQ.Location = new System.Drawing.Point(43, 189);
-            this.gbx_Setup_DAQ.Name = "gbx_Setup_DAQ";
-            this.gbx_Setup_DAQ.Size = new System.Drawing.Size(332, 123);
-            this.gbx_Setup_DAQ.TabIndex = 20;
-            this.gbx_Setup_DAQ.TabStop = false;
-            this.gbx_Setup_DAQ.Text = "Setup DAQ";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(31, 32);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(89, 14);
-            this.label12.TabIndex = 0;
-            this.label12.Text = "Device name = ";
-            // 
-            // txt_DAQ_Setup_Name
-            // 
-            this.txt_DAQ_Setup_Name.Location = new System.Drawing.Point(126, 29);
-            this.txt_DAQ_Setup_Name.Name = "txt_DAQ_Setup_Name";
-            this.txt_DAQ_Setup_Name.Size = new System.Drawing.Size(184, 20);
-            this.txt_DAQ_Setup_Name.TabIndex = 1;
-            this.txt_DAQ_Setup_Name.Text = "USB-231";
-            this.txt_DAQ_Setup_Name.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // txt_DAQ_Setup_Sampling_Rate
-            // 
-            this.txt_DAQ_Setup_Sampling_Rate.Location = new System.Drawing.Point(126, 70);
-            this.txt_DAQ_Setup_Sampling_Rate.Name = "txt_DAQ_Setup_Sampling_Rate";
-            this.txt_DAQ_Setup_Sampling_Rate.Size = new System.Drawing.Size(75, 20);
-            this.txt_DAQ_Setup_Sampling_Rate.TabIndex = 3;
-            this.txt_DAQ_Setup_Sampling_Rate.Text = "50000";
-            this.txt_DAQ_Setup_Sampling_Rate.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(23, 73);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(97, 14);
-            this.label13.TabIndex = 2;
-            this.label13.Text = "Sampling Rate = ";
             // 
             // gbx_Setup_Display
             // 
@@ -1425,65 +1963,12 @@ namespace ULAI01
             this.gbx_Setup_Display.Controls.Add(this.label16);
             this.gbx_Setup_Display.Controls.Add(this.txt_Display_Sampling);
             this.gbx_Setup_Display.Controls.Add(this.label14);
-            this.gbx_Setup_Display.Location = new System.Drawing.Point(43, 343);
+            this.gbx_Setup_Display.Location = new System.Drawing.Point(43, 498);
             this.gbx_Setup_Display.Name = "gbx_Setup_Display";
             this.gbx_Setup_Display.Size = new System.Drawing.Size(332, 100);
             this.gbx_Setup_Display.TabIndex = 21;
             this.gbx_Setup_Display.TabStop = false;
             this.gbx_Setup_Display.Text = "Setup Display ";
-            // 
-            // txt_Display_Sampling
-            // 
-            this.txt_Display_Sampling.Location = new System.Drawing.Point(126, 23);
-            this.txt_Display_Sampling.Name = "txt_Display_Sampling";
-            this.txt_Display_Sampling.Size = new System.Drawing.Size(75, 20);
-            this.txt_Display_Sampling.TabIndex = 5;
-            this.txt_Display_Sampling.Text = "10";
-            this.txt_Display_Sampling.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(13, 26);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(112, 14);
-            this.label14.TabIndex = 4;
-            this.label14.Text = "Display Sampling = ";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(211, 73);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(99, 14);
-            this.label15.TabIndex = 4;
-            this.label15.Text = "Sample/Seconds";
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(211, 26);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(99, 14);
-            this.label16.TabIndex = 5;
-            this.label16.Text = "Sample/Seconds";
-            // 
-            // txt_File_Name
-            // 
-            this.txt_File_Name.Enabled = false;
-            this.txt_File_Name.Location = new System.Drawing.Point(98, 188);
-            this.txt_File_Name.Name = "txt_File_Name";
-            this.txt_File_Name.Size = new System.Drawing.Size(212, 20);
-            this.txt_File_Name.TabIndex = 19;
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(20, 191);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(72, 14);
-            this.label17.TabIndex = 20;
-            this.label17.Text = "File Name = ";
             // 
             // txt_Display_Average
             // 
@@ -1503,12 +1988,305 @@ namespace ULAI01
             this.label18.TabIndex = 6;
             this.label18.Text = "Display Average = ";
             // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(211, 26);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(99, 14);
+            this.label16.TabIndex = 5;
+            this.label16.Text = "Sample/Seconds";
+            // 
+            // txt_Display_Sampling
+            // 
+            this.txt_Display_Sampling.Location = new System.Drawing.Point(126, 23);
+            this.txt_Display_Sampling.Name = "txt_Display_Sampling";
+            this.txt_Display_Sampling.Size = new System.Drawing.Size(75, 20);
+            this.txt_Display_Sampling.TabIndex = 5;
+            this.txt_Display_Sampling.Text = "10";
+            this.txt_Display_Sampling.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(13, 26);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(112, 14);
+            this.label14.TabIndex = 4;
+            this.label14.Text = "Display Sampling = ";
+            // 
+            // gbx_Setup_DAQ
+            // 
+            this.gbx_Setup_DAQ.Controls.Add(this.label29);
+            this.gbx_Setup_DAQ.Controls.Add(this.label28);
+            this.gbx_Setup_DAQ.Controls.Add(this.txtRecentIntervalRecord);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkRecentRecord);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkChEnable2);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkChEnable3);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkChEnable1);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkChEnable0);
+            this.gbx_Setup_DAQ.Controls.Add(this.label24);
+            this.gbx_Setup_DAQ.Controls.Add(this.label23);
+            this.gbx_Setup_DAQ.Controls.Add(this.label22);
+            this.gbx_Setup_DAQ.Controls.Add(this.txtIntervalDAQ);
+            this.gbx_Setup_DAQ.Controls.Add(this.label21);
+            this.gbx_Setup_DAQ.Controls.Add(this.txtTimeTreshDAQ);
+            this.gbx_Setup_DAQ.Controls.Add(this.label20);
+            this.gbx_Setup_DAQ.Controls.Add(this.txtVoltageTreshDAQ);
+            this.gbx_Setup_DAQ.Controls.Add(this.chkThresRecord);
+            this.gbx_Setup_DAQ.Controls.Add(this.label19);
+            this.gbx_Setup_DAQ.Controls.Add(this.label15);
+            this.gbx_Setup_DAQ.Controls.Add(this.txt_DAQ_Setup_Sampling_Rate);
+            this.gbx_Setup_DAQ.Controls.Add(this.label13);
+            this.gbx_Setup_DAQ.Controls.Add(this.txt_DAQ_Setup_Name);
+            this.gbx_Setup_DAQ.Controls.Add(this.label12);
+            this.gbx_Setup_DAQ.Location = new System.Drawing.Point(43, 124);
+            this.gbx_Setup_DAQ.Name = "gbx_Setup_DAQ";
+            this.gbx_Setup_DAQ.Size = new System.Drawing.Size(332, 354);
+            this.gbx_Setup_DAQ.TabIndex = 20;
+            this.gbx_Setup_DAQ.TabStop = false;
+            this.gbx_Setup_DAQ.Text = "Setup DAQ";
+            // 
+            // chkChEnable2
+            // 
+            this.chkChEnable2.AutoSize = true;
+            this.chkChEnable2.Location = new System.Drawing.Point(171, 61);
+            this.chkChEnable2.Name = "chkChEnable2";
+            this.chkChEnable2.Size = new System.Drawing.Size(119, 18);
+            this.chkChEnable2.TabIndex = 18;
+            this.chkChEnable2.Text = "Channel 2 Enable";
+            this.chkChEnable2.UseVisualStyleBackColor = true;
+            this.chkChEnable2.CheckedChanged += new System.EventHandler(this.chkChEnable2_CheckedChanged);
+            // 
+            // chkChEnable3
+            // 
+            this.chkChEnable3.AutoSize = true;
+            this.chkChEnable3.Location = new System.Drawing.Point(171, 93);
+            this.chkChEnable3.Name = "chkChEnable3";
+            this.chkChEnable3.Size = new System.Drawing.Size(119, 18);
+            this.chkChEnable3.TabIndex = 17;
+            this.chkChEnable3.Text = "Channel 3 Enable";
+            this.chkChEnable3.UseVisualStyleBackColor = true;
+            this.chkChEnable3.CheckedChanged += new System.EventHandler(this.chkChEnable3_CheckedChanged);
+            // 
+            // chkChEnable1
+            // 
+            this.chkChEnable1.AutoSize = true;
+            this.chkChEnable1.Location = new System.Drawing.Point(41, 93);
+            this.chkChEnable1.Name = "chkChEnable1";
+            this.chkChEnable1.Size = new System.Drawing.Size(119, 18);
+            this.chkChEnable1.TabIndex = 16;
+            this.chkChEnable1.Text = "Channel 1 Enable";
+            this.chkChEnable1.UseVisualStyleBackColor = true;
+            this.chkChEnable1.CheckedChanged += new System.EventHandler(this.chkChEnable1_CheckedChanged);
+            // 
+            // chkChEnable0
+            // 
+            this.chkChEnable0.AutoSize = true;
+            this.chkChEnable0.Location = new System.Drawing.Point(41, 61);
+            this.chkChEnable0.Name = "chkChEnable0";
+            this.chkChEnable0.Size = new System.Drawing.Size(119, 18);
+            this.chkChEnable0.TabIndex = 15;
+            this.chkChEnable0.Text = "Channel 0 Enable";
+            this.chkChEnable0.UseVisualStyleBackColor = true;
+            this.chkChEnable0.CheckedChanged += new System.EventHandler(this.chkChEnable0_CheckedChanged);
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(254, 307);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(55, 14);
+            this.label24.TabIndex = 14;
+            this.label24.Text = "Seconds";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(254, 281);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(74, 14);
+            this.label23.TabIndex = 13;
+            this.label23.Text = "Miliseconds";
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(255, 254);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(35, 14);
+            this.label22.TabIndex = 12;
+            this.label22.Text = "Volts";
+            // 
+            // txtIntervalDAQ
+            // 
+            this.txtIntervalDAQ.Enabled = false;
+            this.txtIntervalDAQ.Location = new System.Drawing.Point(177, 304);
+            this.txtIntervalDAQ.Name = "txtIntervalDAQ";
+            this.txtIntervalDAQ.Size = new System.Drawing.Size(75, 20);
+            this.txtIntervalDAQ.TabIndex = 11;
+            this.txtIntervalDAQ.Text = "3";
+            this.txtIntervalDAQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(84, 308);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(91, 14);
+            this.label21.TabIndex = 10;
+            this.label21.Text = "Time interval = ";
+            // 
+            // txtTimeTreshDAQ
+            // 
+            this.txtTimeTreshDAQ.Enabled = false;
+            this.txtTimeTreshDAQ.Location = new System.Drawing.Point(177, 278);
+            this.txtTimeTreshDAQ.Name = "txtTimeTreshDAQ";
+            this.txtTimeTreshDAQ.Size = new System.Drawing.Size(75, 20);
+            this.txtTimeTreshDAQ.TabIndex = 9;
+            this.txtTimeTreshDAQ.Text = "10";
+            this.txtTimeTreshDAQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(68, 281);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(107, 14);
+            this.label20.TabIndex = 8;
+            this.label20.Text = "Time Threshold = ";
+            // 
+            // txtVoltageTreshDAQ
+            // 
+            this.txtVoltageTreshDAQ.Enabled = false;
+            this.txtVoltageTreshDAQ.Location = new System.Drawing.Point(177, 251);
+            this.txtVoltageTreshDAQ.Name = "txtVoltageTreshDAQ";
+            this.txtVoltageTreshDAQ.Size = new System.Drawing.Size(75, 20);
+            this.txtVoltageTreshDAQ.TabIndex = 7;
+            this.txtVoltageTreshDAQ.Text = "1";
+            this.txtVoltageTreshDAQ.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtVoltageTreshDAQ.TextChanged += new System.EventHandler(this.txtVoltageTreshDAQ_TextChanged);
+            // 
+            // chkThresRecord
+            // 
+            this.chkThresRecord.AutoSize = true;
+            this.chkThresRecord.Location = new System.Drawing.Point(34, 227);
+            this.chkThresRecord.Name = "chkThresRecord";
+            this.chkThresRecord.Size = new System.Drawing.Size(142, 18);
+            this.chkThresRecord.TabIndex = 6;
+            this.chkThresRecord.Text = "Threshold Recording";
+            this.chkThresRecord.UseVisualStyleBackColor = true;
+            this.chkThresRecord.CheckedChanged += new System.EventHandler(this.chkThresRecord_CheckedChanged);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(55, 255);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(120, 14);
+            this.label19.TabIndex = 5;
+            this.label19.Text = "Voltage Threshold = ";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(211, 131);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(99, 14);
+            this.label15.TabIndex = 4;
+            this.label15.Text = "Sample/Seconds";
+            // 
+            // txt_DAQ_Setup_Sampling_Rate
+            // 
+            this.txt_DAQ_Setup_Sampling_Rate.Location = new System.Drawing.Point(126, 128);
+            this.txt_DAQ_Setup_Sampling_Rate.Name = "txt_DAQ_Setup_Sampling_Rate";
+            this.txt_DAQ_Setup_Sampling_Rate.Size = new System.Drawing.Size(75, 20);
+            this.txt_DAQ_Setup_Sampling_Rate.TabIndex = 3;
+            this.txt_DAQ_Setup_Sampling_Rate.Text = "6250";
+            this.txt_DAQ_Setup_Sampling_Rate.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(23, 131);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(97, 14);
+            this.label13.TabIndex = 2;
+            this.label13.Text = "Sampling Rate = ";
+            // 
+            // txt_DAQ_Setup_Name
+            // 
+            this.txt_DAQ_Setup_Name.Location = new System.Drawing.Point(126, 22);
+            this.txt_DAQ_Setup_Name.Name = "txt_DAQ_Setup_Name";
+            this.txt_DAQ_Setup_Name.Size = new System.Drawing.Size(184, 20);
+            this.txt_DAQ_Setup_Name.TabIndex = 1;
+            this.txt_DAQ_Setup_Name.Text = "USB-231";
+            this.txt_DAQ_Setup_Name.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(31, 25);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(89, 14);
+            this.label12.TabIndex = 0;
+            this.label12.Text = "Device name = ";
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.groupBox3);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(428, 631);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Force";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // txtRecentIntervalRecord
+            // 
+            this.txtRecentIntervalRecord.Enabled = false;
+            this.txtRecentIntervalRecord.Location = new System.Drawing.Point(177, 190);
+            this.txtRecentIntervalRecord.Name = "txtRecentIntervalRecord";
+            this.txtRecentIntervalRecord.Size = new System.Drawing.Size(75, 20);
+            this.txtRecentIntervalRecord.TabIndex = 21;
+            this.txtRecentIntervalRecord.Text = "30";
+            this.txtRecentIntervalRecord.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // chkRecentRecord
+            // 
+            this.chkRecentRecord.AutoSize = true;
+            this.chkRecentRecord.Location = new System.Drawing.Point(34, 166);
+            this.chkRecentRecord.Name = "chkRecentRecord";
+            this.chkRecentRecord.Size = new System.Drawing.Size(211, 18);
+            this.chkRecentRecord.TabIndex = 20;
+            this.chkRecentRecord.Text = "Recent Sample Recording Interval";
+            this.chkRecentRecord.UseVisualStyleBackColor = true;
+            this.chkRecentRecord.CheckedChanged += new System.EventHandler(this.chkRecentRecord_CheckedChanged);
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(84, 193);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(91, 14);
+            this.label28.TabIndex = 22;
+            this.label28.Text = "Time interval = ";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(254, 193);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(55, 14);
+            this.label29.TabIndex = 23;
+            this.label29.Text = "Seconds";
+            // 
             // frmDataDisplay
             // 
             this.AcceptButton = this.cmdStartConvert;
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 13);
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(439, 509);
+            this.ClientSize = new System.Drawing.Size(437, 659);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.lblInstruction);
             this.Controls.Add(this.lblShowData);
@@ -1531,11 +2309,14 @@ namespace ULAI01
             this.groupBox3.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
-            this.gbx_Setup_DAQ.ResumeLayout(false);
-            this.gbx_Setup_DAQ.PerformLayout();
             this.gbx_Setup_Display.ResumeLayout(false);
             this.gbx_Setup_Display.PerformLayout();
+            this.gbx_Setup_DAQ.ResumeLayout(false);
+            this.gbx_Setup_DAQ.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1676,6 +2457,106 @@ namespace ULAI01
         private void txtVoltsToSet_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void txtVoltageTreshDAQ_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chkThresRecord_CheckedChanged(object sender, EventArgs e)
+        {
+            if(chkThresRecord.Checked == true)
+            {
+                ThresholeRecording = true;
+                txtVoltageTreshDAQ.Enabled = true; 
+                txtTimeTreshDAQ.Enabled = true;
+                txtIntervalDAQ.Enabled = true;
+            }
+            else
+            {
+                ThresholeRecording = false;
+                txtVoltageTreshDAQ.Enabled = false;
+                txtTimeTreshDAQ.Enabled = false;
+                txtIntervalDAQ.Enabled = false;
+            }
+        }
+
+        private void txtForce_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblShowVoltsCh0_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chkRecentRecord_CheckedChanged(object sender, EventArgs e)
+        {
+            if(chkRecentRecord.Checked == true)
+            {
+                txtRecentIntervalRecord.Enabled = true;
+                RecentSampleRecording = true;
+            }
+            else
+            {
+                txtRecentIntervalRecord.Enabled = false;
+                RecentSampleRecording = false;
+            }
+        }
+
+        private void chkChEnable0_CheckedChanged(object sender, EventArgs e)
+        {
+            if(chkChEnable0.Checked == true)
+            {
+                Channel_Sel |= 0x01; 
+            }
+            else
+            {
+                Channel_Sel &= ~0x01;
+            }
+        }
+
+        private void chkChEnable1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkChEnable1.Checked == true)
+            {
+                Channel_Sel |= 0x02;
+            }
+            else
+            {
+                Channel_Sel &= ~0x02;
+            }
+        }
+
+        private void chkChEnable2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkChEnable2.Checked == true)
+            {
+                Channel_Sel |= 0x04;
+            }
+            else
+            {
+                Channel_Sel &= ~0x04;
+            }
+        }
+
+        private void chkChEnable3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkChEnable3.Checked == true)
+            {
+                Channel_Sel |= 0x08;
+            }
+            else
+            {
+                Channel_Sel &= ~0x08;
+            }
         }
 
         private void txtNumChan_TextChanged(object sender, EventArgs e)
